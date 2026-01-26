@@ -14,21 +14,41 @@ type NavLink = {
 
 /* =====================
     Component
+    
 ===================== */
-const Navbar: React.FC = () => {
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  image: string | null;
+  phone: string | null;
+  role: string;
+  status: string;
+  createdAt: string;   // ISO date string
+  updatedAt: string;   // ISO date string
+}
+const Navbar: React.FC = ({user}:User): React.ReactNode | Promise<React.ReactNode> => {
+  
   const [open, setOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   
   // Next.js এর নিজস্ব হুক যা হাইড্রেশন এরর প্রতিরোধ করে
   const pathname = usePathname();
 
-  const links: NavLink[] = [
+  let links: NavLink[] = [
     { label: "Home", href: "/" },
     { label: "Tutors", href: "/tutors" },
     { label: "Login", href: "/login" },
     { label: "Registration", href: "/register" },
-    { label: "Profile", href: "/profile" },
   ];
+  if(user){
+    links=[
+   { label: "Home", href: "/" },
+    { label: "Tutors", href: "/tutors" },
+    { label: "Profile", href: "/profile" },
+    ]
+  }
 
   // Active Link logic
   const isActive = (href: string): boolean => {

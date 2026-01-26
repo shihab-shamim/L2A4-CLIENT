@@ -1,11 +1,14 @@
 import Footer from "@/componets/shered/Footer";
 import Navbar from "@/componets/shered/Navbar";
+import { userService } from "@/service/user.service";
 
 
-const layout = ({children}:{children:React.ReactNode}) => {
+const layout =async ({children}:{children:React.ReactNode}) => {
+      const session=await userService.getSession()
+  console.log("from home page ",session?.data?.user);
     return (
         <div>
-            <Navbar/>
+            <Navbar user={session?.data?.user}/>
             {children}
             <Footer/>
         </div>
