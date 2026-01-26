@@ -137,7 +137,7 @@ const Navbar: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex flex-col gap-2 p-4">
+            <div className="flex flex-col gap-2 p-4 bg-gray-800">
               {links.map((link: NavLink) => (
                 <Link
                   key={link.href}
