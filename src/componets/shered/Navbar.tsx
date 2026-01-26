@@ -116,7 +116,7 @@ const Navbar: React.FC = () => {
 
           <div
             ref={menuRef}
-            className="fixed right-0 top-0 z-50 h-full w-full bg-gray-800 shadow-xl"
+            className="fixed right-0 top-0 z-50 h-full w-full bg-white shadow-xl"
           >
             <div className="flex items-center justify-between border-b px-4 py-4">
               <span className="font-semibold">SkillBridge</span>

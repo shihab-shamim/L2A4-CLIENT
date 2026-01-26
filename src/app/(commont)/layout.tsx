@@ -1,3 +1,4 @@
+import Footer from "@/componets/shered/Footer";
 import Navbar from "@/componets/shered/Navbar";
 
 
@@ -6,6 +7,7 @@ const layout = ({children}:{children:React.ReactNode}) => {
         <div>
             <Navbar/>
             {children}
+            <Footer/>
         </div>
     );
 };
