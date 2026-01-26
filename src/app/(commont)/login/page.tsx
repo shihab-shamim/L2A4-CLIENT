@@ -86,7 +86,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
      try {
       const {data,error} =await authClient.signIn.email(values)
      if(data?.user){
-          router.push("/login");
+      toast("log in success")
+          router.push("/");
+          router.refresh();
   
         }
           if(error){

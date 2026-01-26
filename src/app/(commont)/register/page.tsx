@@ -114,7 +114,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }
     const {data,error}=await authClient.signUp.email(info)
     
     if(data?.user){
+      toast("Registration success")
         router.push("/login");
+        router.refresh();
 
       }
         if(error){

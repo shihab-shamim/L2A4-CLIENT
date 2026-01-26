@@ -1,8 +1,10 @@
 "use client";
 
+import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "react-toastify";
 
 /* =====================
     Types
@@ -12,10 +14,6 @@ type NavLink = {
   href: string;
 };
 
-/* =====================
-    Component
-    
-===================== */
 export interface User {
   id: string;
   name: string;
@@ -25,35 +23,66 @@ export interface User {
   phone: string | null;
   role: string;
   status: string;
-  createdAt: string;   // ISO date string
-  updatedAt: string;   // ISO date string
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
 }
-const Navbar: React.FC = ({user}:User): React.ReactNode | Promise<React.ReactNode> => {
-  
+
+type NavbarProps = {
+  user?: User | null;
+
+};
+
+/* =====================
+    Component
+===================== */
+const Navbar: React.FC<NavbarProps> = ({ user }) => {
+
   const [open, setOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
-  
-  // Next.js এর নিজস্ব হুক যা হাইড্রেশন এরর প্রতিরোধ করে
-  const pathname = usePathname();
 
-  let links: NavLink[] = [
-    { label: "Home", href: "/" },
-    { label: "Tutors", href: "/tutors" },
-    { label: "Login", href: "/login" },
-    { label: "Registration", href: "/register" },
-  ];
-  if(user){
-    links=[
-   { label: "Home", href: "/" },
-    { label: "Tutors", href: "/tutors" },
-    { label: "Profile", href: "/profile" },
-    ]
-  }
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const links: NavLink[] = useMemo(() => {
+    if (user) {
+      return [
+        { label: "Home", href: "/" },
+        { label: "Tutors", href: "/tutors" },
+        { label: "Profile", href: "/profile" },
+      ];
+    }
+    return [
+      { label: "Home", href: "/" },
+      { label: "Tutors", href: "/tutors" },
+      { label: "Login", href: "/login" },
+      { label: "Registration", href: "/register" },
+    ];
+  }, [user]);
 
   // Active Link logic
   const isActive = (href: string): boolean => {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
+  };
+
+  const handleLogout = async (): Promise<void> => {
+    try {
+      const {data,error} = await authClient.signOut()
+      console.log("from vabbar" ,data)
+      if(data?.success){
+        toast("log out Success")
+        router.refresh()
+
+      }else{
+         toast("log out failed")
+      }
+      
+      
+      
+    } catch {
+      setOpen(false);
+       toast("log out failed")
+    }
   };
 
   /* =====================
@@ -81,12 +110,9 @@ const Navbar: React.FC = ({user}:User): React.ReactNode | Promise<React.ReactNod
   }, [open]);
 
   useEffect(() => {
-    // মোবাইল মেনু ওপেন থাকলে বডি স্ক্রল বন্ধ রাখা
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (open) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+
     return () => {
       document.body.style.overflow = "";
     };
@@ -121,6 +147,17 @@ const Navbar: React.FC = ({user}:User): React.ReactNode | Promise<React.ReactNod
               {link.label}
             </Link>
           ))}
+
+          {/* Logout (only when user exists) */}
+          {user && (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-xl px-4 py-2 text-sm font-medium transition text-gray-700 hover:bg-gray-100 cursor-pointer"
+            >
+              Logout
+            </button>
+          )}
         </div>
 
         {/* Mobile Button */}
@@ -138,8 +175,8 @@ const Navbar: React.FC = ({user}:User): React.ReactNode | Promise<React.ReactNod
       {open && (
         <div className="md:hidden">
           {/* Overlay */}
-          <div 
-            className="fixed inset-0 bg-black/40 z-40 animate-in fade-in duration-200" 
+          <div
+            className="fixed inset-0 bg-black/40 z-40 animate-in fade-in duration-200"
             onClick={() => setOpen(false)}
           />
 
@@ -172,6 +209,17 @@ const Navbar: React.FC = ({user}:User): React.ReactNode | Promise<React.ReactNod
                   {link.label}
                 </Link>
               ))}
+
+              {/* Logout (only when user exists) */}
+              {user && (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="rounded-xl px-4 py-3 text-sm font-semibold transition bg-gray-50 hover:bg-gray-100 text-gray-700 text-left cursor-pointer border"
+                >
+                  Logout
+                </button>
+              )}
             </div>
           </div>
         </div>
