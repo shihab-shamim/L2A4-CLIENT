@@ -1,12 +1,13 @@
-"use client"
+"use client";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
+import { toast } from "react-toastify";
 
-type LoginRole = "student" | "tutor" | "admin";
 
 type LoginValues = {
   email: string;
   password: string;
-  role: LoginRole;
   remember: boolean;
 };
 
@@ -23,15 +24,18 @@ const LoginForm: React.FC<LoginFormProps> = ({
   onGoogleLogin,
   loading = false,
 }) => {
+   const router = useRouter();
   const [values, setValues] = useState<LoginValues>({
     email: "",
     password: "",
-    role: "student",
     remember: true,
   });
 
   const [errors, setErrors] = useState<LoginErrors>({});
   const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  // IMPORTANT: submit চাপার আগে error দেখাবো না
+  const [submitted, setSubmitted] = useState(false);
 
   const validate = (v: LoginValues): LoginErrors => {
     const next: LoginErrors = {};
@@ -40,30 +44,63 @@ const LoginForm: React.FC<LoginFormProps> = ({
     else if (!/^\S+@\S+\.\S+$/.test(v.email)) next.email = "Enter a valid email.";
 
     if (!v.password) next.password = "Password is required.";
-    else if (v.password.length < 6) next.password = "Password must be at least 6 characters.";
+    else if (v.password.length < 6)
+      next.password = "Password must be at least 6 characters.";
 
-    if (!v.role) next.role = "Role is required.";
+
 
     return next;
   };
 
   const canSubmit = useMemo(() => {
+    // submitted না হলে disable করবো না (শুধু login ক্লিকেই validate হবে)
+    if (!submitted) return true;
+
     const e = validate(values);
     return Object.keys(e).length === 0;
-  }, [values]);
+  }, [values, submitted]);
 
-  const handleChange = <K extends keyof LoginValues>(key: K, val: LoginValues[K]): void => {
+  const handleChange = <K extends keyof LoginValues>(
+    key: K,
+    val: LoginValues[K]
+  ): void => {
     setValues((prev) => ({ ...prev, [key]: val }));
-    setErrors((prev) => ({ ...prev, [key]: undefined })); // clear per-field error
+
+    // user টাইপ করলে ওই field এর error remove
+    setErrors((prev) => ({ ...prev, [key]: undefined }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     e.preventDefault();
+    setSubmitted(true);
 
     const eMap = validate(values);
     setErrors(eMap);
 
     if (Object.keys(eMap).length > 0) return;
+
+
+    
+     try {
+      const {data,error} =await authClient.signIn.email(values)
+     if(data?.user){
+          router.push("/login");
+  
+        }
+          if(error){
+          toast(error.message)
+        }
+      
+
+      
+     } catch (error) {
+      toast.error("something is wrong");
+      console.log(error);
+      
+     }
+
 
     await onSubmit?.(values);
   };
@@ -85,8 +122,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
           {/* Form */}
           <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-       
-
             {/* Email */}
             <div>
               <label className="text-xs font-semibold text-gray-700">Email</label>
@@ -97,12 +132,16 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 placeholder="you@example.com"
                 className="mt-2 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-900/20"
               />
-              {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
+              {submitted && errors.email && (
+                <p className="mt-1 text-xs text-red-600">{errors.email}</p>
+              )}
             </div>
 
             {/* Password */}
             <div>
-              <label className="text-xs font-semibold text-gray-700">Password</label>
+              <label className="text-xs font-semibold text-gray-700">
+                Password
+              </label>
               <div className="mt-2 flex items-center gap-2">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -119,7 +158,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
                   {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
-              {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password}</p>}
+              {submitted && errors.password && (
+                <p className="mt-1 text-xs text-red-600">{errors.password}</p>
+              )}
             </div>
 
             {/* Remember + Forgot */}
@@ -134,7 +175,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 Remember me
               </label>
 
-              <a href="/forgot-password" className="text-sm font-semibold text-gray-900 hover:underline">
+              <a
+                href="/forgot-password"
+                className="text-sm font-semibold text-gray-900 hover:underline"
+              >
                 Forgot password?
               </a>
             </div>
@@ -167,7 +211,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
             {/* Footer */}
             <p className="pt-2 text-center text-sm text-gray-600">
               Don&apos;t have an account?{" "}
-              <a href="/register" className="font-semibold text-gray-900 hover:underline">
+              <a
+                href="/register"
+                className="font-semibold text-gray-900 hover:underline"
+              >
                 Register
               </a>
             </p>

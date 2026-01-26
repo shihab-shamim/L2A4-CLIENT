@@ -1,10 +1,14 @@
-"use client"
+"use client";
+import { createUser } from "@/actions/user.actions";
+import { authClient } from "@/lib/auth-client";
 import React, { useMemo, useState } from "react";
+import { useRouter } from "next/navigation"
+import { toast } from "react-toastify";
 
 /* =====================
    Types
 ===================== */
-type UserRole = "student" | "tutor";
+type UserRole = "STUDENT" | "TUTOR";
 
 type RegisterValues = {
   fullName: string;
@@ -22,16 +26,14 @@ type RegisterFormProps = {
   onSubmit?: (values: Omit<RegisterValues, "confirmPassword">) => Promise<void> | void;
 };
 
-/* =====================
-   Component
-===================== */
 const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }) => {
+   const router = useRouter();
   const [values, setValues] = useState<RegisterValues>({
     fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role: "student",
+    role: "STUDENT",
     acceptTerms: false,
   });
 
@@ -64,8 +66,31 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }
   const canSubmit = useMemo(() => Object.keys(validate(values)).length === 0, [values]);
 
   const handleChange = <K extends keyof RegisterValues>(key: K, val: RegisterValues[K]): void => {
-    setValues((prev) => ({ ...prev, [key]: val }));
-    setErrors((prev) => ({ ...prev, [key]: undefined }));
+    // value update
+    setValues((prev) => {
+      const next = { ...prev, [key]: val };
+      return next;
+    });
+
+    // live validate: field valid হলে error remove; invalid হলে field error set
+    setErrors((prev) => {
+      const nextValues: RegisterValues = { ...values, [key]: val } as RegisterValues;
+      const freshErrors = validate(nextValues);
+
+      return {
+        ...prev,
+        [key]: freshErrors[key],
+        // password change হলে confirmPassword mismatch recalc করা দরকার
+        ...(key === "password" || key === "confirmPassword"
+          ? { confirmPassword: freshErrors.confirmPassword }
+          : {}),
+      };
+    });
+  };
+
+  const handleBlur = (key: keyof RegisterValues) => {
+    const freshErrors = validate(values);
+    setErrors((prev) => ({ ...prev, [key]: freshErrors[key] }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
@@ -74,6 +99,32 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }
     const eMap = validate(values);
     setErrors(eMap);
     if (Object.keys(eMap).length > 0) return;
+
+    // ✅ required: click করলে console এ সব value দেখাবে
+  
+    const name=values.fullName
+    const email=values.email
+    const password=values.password
+    const role=values.role
+    const info={name,email,password,role}
+ 
+
+   
+   try {
+    const {data,error}=await authClient.signUp.email(info)
+    
+    if(data?.user){
+        router.push("/login");
+
+      }
+        if(error){
+        toast(error.message)
+      }
+    
+   } catch (error) {
+    console.log("error from res",error);
+    
+   }
 
     const payload: Omit<RegisterValues, "confirmPassword"> = {
       fullName: values.fullName.trim(),
@@ -96,9 +147,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }
               SB
             </div>
             <h1 className="mt-4 text-2xl font-bold text-gray-900">Create your account</h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Choose a role and start using SkillBridge.
-            </p>
+            <p className="mt-1 text-sm text-gray-600">Choose a role and start using SkillBridge.</p>
           </div>
 
           {/* Form */}
@@ -109,10 +158,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={() => handleChange("role", "student")}
+                  onClick={() => handleChange("role", "STUDENT")}
                   className={[
                     "rounded-xl border px-4 py-3 text-sm font-semibold transition",
-                    values.role === "student"
+                    values.role === "STUDENT"
                       ? "bg-gray-900 text-white border-gray-900"
                       : "bg-white text-gray-900 hover:bg-gray-50",
                   ].join(" ")}
@@ -121,10 +170,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleChange("role", "tutor")}
+                  onClick={() => handleChange("role", "TUTOR")}
                   className={[
                     "rounded-xl border px-4 py-3 text-sm font-semibold transition",
-                    values.role === "tutor"
+                    values.role === "TUTOR"
                       ? "bg-gray-900 text-white border-gray-900"
                       : "bg-white text-gray-900 hover:bg-gray-50",
                   ].join(" ")}
@@ -141,6 +190,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }
               <input
                 value={values.fullName}
                 onChange={(e) => handleChange("fullName", e.target.value)}
+                onBlur={() => handleBlur("fullName")}
                 placeholder="Your name"
                 className="mt-2 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-900/20"
               />
@@ -154,6 +204,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }
                 type="email"
                 value={values.email}
                 onChange={(e) => handleChange("email", e.target.value)}
+                onBlur={() => handleBlur("email")}
                 placeholder="you@example.com"
                 className="mt-2 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-900/20"
               />
@@ -168,6 +219,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }
                   type={showPassword ? "text" : "password"}
                   value={values.password}
                   onChange={(e) => handleChange("password", e.target.value)}
+                  onBlur={() => handleBlur("password")}
                   placeholder="••••••••"
                   className="w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-900/20"
                 />
@@ -190,6 +242,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }
                   type={showConfirmPassword ? "text" : "password"}
                   value={values.confirmPassword}
                   onChange={(e) => handleChange("confirmPassword", e.target.value)}
+                  onBlur={() => handleBlur("confirmPassword")}
                   placeholder="••••••••"
                   className="w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-900/20"
                 />
@@ -213,6 +266,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }
                   type="checkbox"
                   checked={values.acceptTerms}
                   onChange={(e) => handleChange("acceptTerms", e.target.checked)}
+                  onBlur={() => handleBlur("acceptTerms")}
                   className="mt-1 h-4 w-4 rounded border-gray-300"
                 />
                 <span>
@@ -236,7 +290,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ loading = false, onSubmit }
             <button
               type="submit"
               disabled={loading || !canSubmit}
-              className="w-full rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full rounded-xl cursor-pointer bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? "Creating..." : "Create Account"}
             </button>
