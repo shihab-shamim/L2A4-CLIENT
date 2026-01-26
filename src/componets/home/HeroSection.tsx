@@ -29,14 +29,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onBrowseTutors, onGetStarted 
               <button
                 type="button"
                 onClick={onBrowseTutors}
-                className="rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800"
+                className="rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 cursor-pointer"
               >
                 Browse Tutors
               </button>
               <button
                 type="button"
                 onClick={onGetStarted}
-                className="rounded-xl border px-5 py-3 text-sm font-semibold text-gray-900 transition hover:bg-gray-50"
+                className="rounded-xl border px-5 py-3 text-sm font-semibold text-gray-900 transition hover:bg-gray-50 cursor-pointer"
               >
                 Get Started
               </button>
