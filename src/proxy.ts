@@ -1,48 +1,68 @@
 import { NextRequest, NextResponse } from "next/server";
 import { userService } from "./service/user.service";
-// import { userService } from "./services/user.service";
-// import { Roles } from "./constants/roles";
+
+type Role = "ADMIN" | "STUDENT" | "TUTOR";
 
 export async function proxy(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
+  const { pathname } = request.nextUrl;
+
+
+  const isDashboardPath =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/admin-dashboard") ||
+    pathname.startsWith("/tutor-dashboard");
+
+  if (!isDashboardPath) return NextResponse.next();
 
   let isAuthenticated = false;
-//   let isAdmin = false;
+  let role: Role | "" = "";
 
   const { data } = await userService.getSession();
 
-  if (data) {
+  if (data?.user?.role) {
     isAuthenticated = true;
-    // isAdmin = data.user.role === Roles.admin;
+    role = data.user.role as Role;
   }
 
-  //* User in not authenticated at all
 
   if (!isAuthenticated) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  //* User is authenticated and role = ADMIN
-  //* User can not visit user dashboard
-//   if (isAdmin && pathname.startsWith("/dashboard")) {
-//     return NextResponse.redirect(new URL("/admin-dashboard", request.url));
-//   }
 
-  //* User is authenticated and role = USER
-  //* User can not visit admin-dashboard
+  const roleDashboards: Record<Role, string> = {
+    ADMIN: "/admin-dashboard",
+    STUDENT: "/dashboard",
+    TUTOR: "/tutor-dashboard",
+  };
 
-//   if (!isAdmin && pathname.startsWith("/admin-dashboard")) {
-//     return NextResponse.redirect(new URL("/dashboard", request.url));
-//   }
+ 
+  if (!role || !(role in roleDashboards)) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  const allowedBase = roleDashboards[role];
+
+  // ✅ If user tries to access any other dashboard base => redirect to own
+  const tryingOtherDashboard =
+    (pathname.startsWith("/dashboard") && allowedBase !== "/dashboard") ||
+    (pathname.startsWith("/admin-dashboard") && allowedBase !== "/admin-dashboard") ||
+    (pathname.startsWith("/tutor-dashboard") && allowedBase !== "/tutor-dashboard");
+
+  if (tryingOtherDashboard) {
+    return NextResponse.redirect(new URL(allowedBase, request.url));
+  }
 
   return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    "/dashboard"
-    // "/dashboard/:path*",
-    // "/admin-dashboard",
-    // "/admin-dashboard/:path*",
+    "/dashboard",
+    "/dashboard/:path*",
+    "/admin-dashboard",
+    "/admin-dashboard/:path*",
+    "/tutor-dashboard",
+    "/tutor-dashboard/:path*",
   ],
 };
