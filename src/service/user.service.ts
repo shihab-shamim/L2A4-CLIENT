@@ -1,6 +1,6 @@
 import { env } from "@/env"
-import { authClient } from "@/lib/auth-client";
 import { cookies } from "next/headers"
+
 
 
 const API_URL=env.API_URL;
@@ -54,6 +54,40 @@ const res= await fetch(`${AUTH_URL}/get-session`,{
                 return {data:null , error:{message:"something went wrong"}}
               }
 
-            }
+            },
+   updateUserAction: async function ({
+    email,
+    status,
+  }: {
+    email: string;
+    status: "ACTIVE" | "BANNED";
+  }) {
+    try {
+      const cookieStore = await cookies();
+
+      const res = await fetch(
+        `${API_URL}/api/users?email=${encodeURIComponent(email)}&status=${status}`,
+        {
+          method: "PUT",
+          headers: {
+            Cookie: cookieStore.toString(),
+          },
+          next: { tags: ["users"] },
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.text().catch(() => "");
+        return { data: null, error: { message: err || "Failed to update user" } };
+      }
+
+      
+
+      const data = await res.json();
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error: { message: "something went wrong" } };
+    }
+  },
     
 }
