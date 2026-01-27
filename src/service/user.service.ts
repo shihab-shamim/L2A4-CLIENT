@@ -38,17 +38,5 @@ const res= await fetch(`${AUTH_URL}/get-session`,{
        }
 
     },
-     createUser: async function (payload: CreateUserInput): Promise<ServiceResult<unknown>> {
-    try {
-      const res = await authClient.signUp.email(payload);
-     console.log("user from service",res);
-      if ((res)?.error) {
-        return { data: null, error: { message: (res).error?.message ?? "Signup failed", details: res } };
-      }
-
-      return { data: (res)?.data ?? res, error: null };
-    } catch (error) {
-      return { data: null, error: { message: "Something went wrong while creating user", details: error } };
-    }
-  },
+    
 }

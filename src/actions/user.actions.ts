@@ -7,9 +7,4 @@ type CreateUserInput = {
   password: string;
   role?: "STUDENT" | "TUTOR" ;
   callbackURL?: string;
-};
-export const createUser=async(data:CreateUserInput)=>{
-    const user = await userService.createUser(data)
-    return user 
-
 }
