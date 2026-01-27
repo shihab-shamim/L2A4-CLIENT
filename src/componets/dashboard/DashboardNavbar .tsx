@@ -32,13 +32,13 @@ const navLinks: Record<UserRole, { label: string; href: string }[]> = {
     { label: "Profile", href: "/dashboard/profile" },
   ],
   TUTOR: [
-    { label: "Dashboard", href: "/tutor/dashboard" },
+    { label: "Dashboard", href: "/tutor-dashboard" },
     { label: "Availability", href: "/tutor/availability" },
     { label: "Profile", href: "/tutor/profile" },
   ],
   ADMIN: [
-    { label: "Dashboard", href: "/admin" },
-    { label: "Users", href: "/admin/users" },
+    { label: "Dashboard", href: "/admin-dashboard" },
+    { label: "Users", href: "/admin-dashboard/users" },
     { label: "Bookings", href: "/admin/bookings" },
     { label: "Categories", href: "/admin/categories" },
   ],
@@ -47,7 +47,6 @@ const navLinks: Record<UserRole, { label: string; href: string }[]> = {
 const DashboardNavbar = () => {
   const pathname = usePathname();
 
-  // 🔴 example UserRole (replace with real session)
    let role: UserRole = "TUTOR";
    const { data } = authClient.useSession();
    const user = (data?.user ?? null) as User | null;
