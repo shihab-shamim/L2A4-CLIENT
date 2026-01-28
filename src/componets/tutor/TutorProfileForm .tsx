@@ -1,7 +1,13 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+import { tutorProfileCreateAndUpdate } from "@/actions/user.actions";
 
+/* =====================
+   Types
+===================== */
 type TutorProfile = {
   id: string;
   userId: string;
@@ -29,12 +35,26 @@ type FormState = {
   isFeatured: boolean;
 };
 
+type TutorProfilePayload = {
+  headline: string;
+  about: string;
+  hourlyRate: number;
+  currency: string;
+  subjects: string[];
+  languages: string[];
+  isFeatured: boolean;
+};
+
 export default function TutorProfileForm({
   tutorProfile,
 }: {
   tutorProfile: TutorProfile | null;
 }) {
-  // ✅ safe profile (never null)
+  const router = useRouter();
+
+  /* =====================
+     Safe Profile
+  ===================== */
   const safeProfile = useMemo<TutorProfile>(() => {
     const now = new Date().toISOString();
 
@@ -58,21 +78,35 @@ export default function TutorProfileForm({
     );
   }, [tutorProfile]);
 
-  // ✅ init form from safeProfile
-  const [form, setForm] = useState<FormState>({
-    headline: safeProfile.headline ?? "",
-    about: safeProfile.about ?? "",
-    hourlyRate: safeProfile.hourlyRate ?? 0,
-    currency: safeProfile.currency ?? "BDT",
-    subjectsText: (safeProfile.subjects ?? []).join(", "),
-    languagesText: (safeProfile.languages ?? []).join(", "),
-    isFeatured: safeProfile.isFeatured ?? false,
+  const buildFormFromProfile = (p: TutorProfile): FormState => ({
+    headline: p.headline ?? "",
+    about: p.about ?? "",
+    hourlyRate: typeof p.hourlyRate === "number" ? p.hourlyRate : 0,
+    currency: p.currency ?? "BDT",
+    subjectsText: (p.subjects ?? []).join(", "),
+    languagesText: (p.languages ?? []).join(", "),
+    isFeatured: !!p.isFeatured,
   });
 
+  /* =====================
+     State
+  ===================== */
+  const [form, setForm] = useState<FormState>(() =>
+    buildFormFromProfile(safeProfile)
+  );
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
+  // tutorProfile পরে load হলে form re-sync
+  useEffect(() => {
+    setForm(buildFormFromProfile(safeProfile));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [safeProfile.id]);
+
+  /* =====================
+     Helpers
+  ===================== */
   const parseList = (text: string) =>
     text
       .split(",")
@@ -83,11 +117,7 @@ export default function TutorProfileForm({
     setForm((p) => ({ ...p, [key]: value }));
   };
 
-  // ✅ if profile null -> we allow create mode, so relaxed validation (no error)
   const validate = () => {
-    // If you're in "create" mode you can still require headline etc.
-    // For now we'll keep it required, but you asked "null thakle error na",
-    // so we won't validate until submit and we will show message nicely.
     if (!form.headline.trim()) return "Headline is required.";
     if (form.hourlyRate < 0) return "Hourly rate cannot be negative.";
     if (!form.currency.trim()) return "Currency is required.";
@@ -101,65 +131,59 @@ export default function TutorProfileForm({
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  /* =====================
+     Submit
+  ===================== */
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setMsg(null);
-    setErr(null);
 
     const v = validate();
     if (v) {
-      setErr(v);
+      toast.error(v);
       return;
     }
 
-    // ✅ If tutorProfile is null, this becomes "create" payload
-    const payload = {
-      id: safeProfile.id || undefined, // update হলে id থাকবে, create হলে undefined
-      userId: safeProfile.userId || undefined,
-
+    const payload: TutorProfilePayload = {
       headline: form.headline.trim(),
       about: form.about.trim(),
-      hourlyRate: Number(form.hourlyRate),
-      currency: form.currency.trim().toUpperCase(),
-
+      hourlyRate: Number(form.hourlyRate) || 0,
+      currency: form.currency.trim(),
       subjects: parseList(form.subjectsText),
       languages: parseList(form.languagesText),
-
-      isFeatured: Boolean(form.isFeatured),
+      isFeatured: !!form.isFeatured,
     };
 
+    setLoading(true);
+    setErr(null);
+    setMsg(null);
+
     try {
-      setLoading(true);
+      const result = await tutorProfileCreateAndUpdate(payload);
 
-      // ✅ Decide endpoint by mode
-      const isEdit = Boolean(tutorProfile?.id);
-      const url = isEdit ? "/api/tutors/profile" : "/api/tutors/profile";
-      const method = isEdit ? "PUT" : "POST"; // create mode => POST
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        throw new Error(txt || `HTTP ${res.status}`);
+      if (result?.error) {
+        const message =
+          (result.error as any)?.message || "Failed to save tutor profile";
+        setErr(message);
+        toast.error(message);
+        return;
       }
 
-      const data = await res.json().catch(() => null);
-      setMsg(isEdit ? "Profile updated successfully." : "Profile created successfully.");
-      console.log("saved:", data);
+      setMsg("Profile saved successfully.");
+      toast.success("Profile saved!");
+      router.refresh();
     } catch (e) {
-      setErr("Save failed");
+      setErr("Something went wrong");
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ UI placeholders if tutorProfile is null
   const isEmpty = tutorProfile === null;
 
+  /* =====================
+     UI
+  ===================== */
   return (
     <div style={{ maxWidth: 720, margin: "0 auto", padding: 16 }}>
       <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>
@@ -178,7 +202,8 @@ export default function TutorProfileForm({
         >
           <div style={{ fontSize: 13, opacity: 0.8, lineHeight: 1.6 }}>
             <div>
-              <b>No profile found.</b> Fill the form below to create your tutor profile.
+              <b>No profile found.</b> Fill the form below to create your tutor
+              profile.
             </div>
             <div style={{ marginTop: 6 }}>
               Tip: Add at least 1 subject and 1 language.
@@ -203,7 +228,8 @@ export default function TutorProfileForm({
               <b>User ID:</b> {safeProfile.userId}
             </div>
             <div>
-              <b>Rating:</b> {safeProfile.ratingAvg} ({safeProfile.totalReviews} reviews)
+              <b>Rating:</b> {safeProfile.ratingAvg} ({safeProfile.totalReviews}{" "}
+              reviews)
             </div>
             <div>
               <b>Sessions:</b> {safeProfile.totalSessions}
@@ -315,7 +341,14 @@ export default function TutorProfileForm({
           }}
         />
 
-        <label style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+        <label
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            marginBottom: 16,
+          }}
+        >
           <input
             type="checkbox"
             checked={form.isFeatured}
@@ -362,6 +395,7 @@ export default function TutorProfileForm({
             border: "1px solid #e5e7eb",
             fontWeight: 700,
             cursor: loading ? "not-allowed" : "pointer",
+            opacity: loading ? 0.7 : 1,
           }}
         >
           {loading ? "Saving..." : isEmpty ? "Create Profile" : "Save Changes"}

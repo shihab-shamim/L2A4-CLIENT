@@ -37,7 +37,7 @@ const navLinks: Record<UserRole, { label: string; href: string }[]> = {
   ],
   TUTOR: [
     { label: "Dashboard", href: "/tutor-dashboard" },
-    { label: "Availability", href: "/tutor/availability" },
+    { label: "Availability", href: "/tutor-dashboard/availability" },
     { label: "Profile", href: "/tutor-dashboard/profile" },
   ],
   ADMIN: [

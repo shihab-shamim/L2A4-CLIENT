@@ -127,6 +127,7 @@ const res= await fetch(`${AUTH_URL}/get-session`,{
       return { data: null, error: { message: "something went wrong" } };
     }
   },
+  
 
     
 }

@@ -16,17 +16,10 @@ const TutorProfilePage = async () => {
   const { data: tutorResp, error: tutorError } =
     await userService.getTutorProfile({ userId: session.user.id });
 
-  if (tutorError) {
-    return <div>Tutor profile error: {tutorError.message}</div>;
-  }
 
   // backend json: { success:true, data: TutorProfile }
   const tutorProfile = tutorResp?.data ?? null;
 
-  if (!tutorProfile) {
-    return <div>No tutor profile found for this user.</div>;
-  }
-//   console.log(tutorProfile);
 
   return (
     <div>
