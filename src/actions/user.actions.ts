@@ -35,6 +35,10 @@ export type TutorProfileData = {
   isFeatured: boolean;
 };
 
+type ActionResult<T> = {
+  data: T | null;
+  error: { message: string } | null;
+};
 
 export async function tutorProfileCreateAndUpdate(
   information: TutorProfileData
@@ -173,7 +177,72 @@ export async function AvailabilitySlotUpdate(
 
 
 
+export async function createAvailabilitySlot(input: {
+  startTime: string; // ISO
+  endTime: string; // ISO
+}) {
+  try {
+    // 1) session (service pattern)
+    const sessionRes = await userService.getSession();
+    const userId = sessionRes.data?.user?.id;
 
+    if (!userId) {
+      return {
+        data: null,
+        error: { message: sessionRes.error?.message || "session is missing" },
+      };
+    }
+
+    // 2) tutor profile (service pattern) -> profile data shape: { success, data }
+    const tutorProfileRes = await userService.getTutorProfile({ userId });
+
+    if (tutorProfileRes.error) {
+      return { data: null, error: { message: tutorProfileRes.error.message } };
+    }
+
+    const tutorId = tutorProfileRes.data?.data?.userId; // ✅ IMPORTANT
+  
+    if (!tutorId) {
+      return { data: null, error: { message: "Tutor profile not found" } };
+    }
+
+    // 3) create slot
+    const cookieStore = await cookies();
+
+    const res = await fetch(`${API_URL}/api/availability`, {
+      method: "POST",
+      headers: {
+        Cookie: cookieStore.toString(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        tutorId,
+        startTime: input.startTime,
+        endTime: input.endTime,
+      }),
+      cache: "no-store",
+    });
+
+    const json = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return {
+        data: null,
+        error: {
+          message: json?.error || json?.message || `HTTP ${res.status}`,
+        },
+      };
+    }
+
+    // ✅ revalidate tag for slot list
+    revalidateTag("slots");
+
+    return { data: json, error: null };
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "something went wrong";
+    return { data: null, error: { message } };
+  }
+}
 
 
   

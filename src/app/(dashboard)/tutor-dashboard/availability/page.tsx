@@ -1,4 +1,5 @@
 import EditPoppup from "@/componets/dashboard/tutor/EditPoppup";
+import SlotAddButton from "@/componets/dashboard/tutor/SlotAddButton";
 import SlotDeletebutton from "@/componets/dashboard/tutor/SlotDeletebutton";
 import { userService } from "@/service/user.service";
 export type AvailabilitySlot = {
@@ -31,7 +32,8 @@ const Page = async () => {
   // ✅ no data found
   if (slots.length === 0) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center bg-gray-50 px-4">
+      <div>
+        <div className="min-h-[70vh] flex items-center justify-center bg-gray-50 px-4">
         <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
           {/* Icon */}
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
@@ -57,6 +59,8 @@ const Page = async () => {
             Tip: Create availability slots to make them visible here.
           </p>
         </div>
+      </div>
+      <SlotAddButton/>
       </div>
     );
   }
@@ -105,6 +109,7 @@ const Page = async () => {
     </div>
   ))}
 </div>
+ <SlotAddButton/>
 
     </div>
   );
