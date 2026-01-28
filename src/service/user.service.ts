@@ -127,6 +127,34 @@ const res= await fetch(`${AUTH_URL}/get-session`,{
       return { data: null, error: { message: "something went wrong" } };
     }
   },
+getAvailabilitySlot: async function () {
+  try {
+    const session = await userService.getSession();
+    const tutorId = session.data?.user?.id;
+
+    if (!tutorId) {
+      return { data: null, error: { message: "unauthorized" } };
+    }
+
+    const cookieStore = await cookies();
+
+    const res = await fetch(`${API_URL}/api/availability/${tutorId}`, {
+      headers: { Cookie: cookieStore.toString() },
+      cache: "no-store",
+      next: { tags: ["slots"] },
+    });
+
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      return { data: null, error: { message: txt || `HTTP ${res.status}` } };
+    }
+
+    return { data: await res.json(), error: null };
+  } catch {
+    return { data: null, error: { message: "something went wrong" } };
+  }
+}
+
   
 
     
