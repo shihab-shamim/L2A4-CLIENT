@@ -1,4 +1,5 @@
 import { env } from "@/env"
+import { methods } from "better-auth/react";
 import { cookies } from "next/headers"
 
 
@@ -89,5 +90,43 @@ const res= await fetch(`${AUTH_URL}/get-session`,{
       return { data: null, error: { message: "something went wrong" } };
     }
   },
+ 
+  getTutorProfile: async function ({
+    userId,
+  }: {
+    userId: string;
+  }) {
+    try {
+      if (!userId) {
+        return { data: null, error: { message: "userId missing" } };
+      }
+
+      const cookieStore = await cookies();
+
+      const res = await fetch(`${API_URL}/api/tutors?userId=${userId}`, {
+        headers: {
+          Cookie: cookieStore.toString(),
+        },
+        cache: "no-store",
+        next: { tags: ["tutorProfile"] },
+      });
+
+      // IMPORTANT: non-2xx handle
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        return {
+          data: null,
+          error: { message: txt || `HTTP ${res.status}` },
+        };
+      }
+
+      const json = await res.json();
+      // backend returns { success, data }
+      return { data: json, error: null };
+    } catch (e) {
+      return { data: null, error: { message: "something went wrong" } };
+    }
+  },
+
     
 }
