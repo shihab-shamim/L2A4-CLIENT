@@ -1,3 +1,4 @@
+
 "use server"
 
 import { userService } from "@/service/user.service"
@@ -34,44 +35,7 @@ export type TutorProfileData = {
   isFeatured: boolean;
 };
 
-// const tutorProfileCreateAndUpdate=async(information:TutorProfileData)=>{
-//    const { data: session, error: sessionError } = await userService.getSession();
-//    const cookieStore = await cookies();
-//    if(session.user.id){
-//     const {data,error}= await userService.getTutorProfile(session.user.id);
-//      if(data){
-//      const tutorProfileUpdate=await fetch(`${API_URL}/api/tutors`,{
-//       method:"PUT",
-//        headers: {
-//           Cookie: cookieStore.toString(),
-//         },
-//         cache: "no-store",
-//         next: { tags: ["tutorProfile"] },
-//         body:JSON.stringify({...information,userId:session.user.id,id:data.id})
-//      })
-//      console.log({tutorProfileUpdate});
-//      }
 
-//      else if(error){
-//       return {error}
-//      }
-//      else{
-//        const createTutorProfile=await fetch(`${API_URL}/api/tutors`,{
-//       method:"POST",
-//        headers: {
-//           Cookie: cookieStore.toString(),
-//         },
-//         cache: "no-store",
-//         next: { tags: ["tutorProfile"] },
-//         body:JSON.stringify({...information,userId:session.user.id,id:data.id})
-//      })
-//      console.log({createTutorProfile});
-//      }
-
-//      }
-
-  
-//    }
 export async function tutorProfileCreateAndUpdate(
   information: TutorProfileData
 ) {
@@ -148,6 +112,36 @@ export async function tutorProfileCreateAndUpdate(
     return { data: null, error: { message: "Something went wrong" } };
   }
 }
+
+export async function AvailabilitySlotDelete(deleteId:string) {
+  try {
+     const cookieStore= await cookies()
+
+    // 4) CREATE
+    // If profileError indicates "not found", we create. Otherwise error out.
+    // (If your getTutorProfile returns error for 404, you may check message/status)
+    const res = await fetch(`${API_URL}/api/availability/${deleteId}`, {
+      method: "DELETE",
+      headers: {
+        Cookie: cookieStore.toString()
+      }
+    });
+
+    const json = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return { data: null, error: { message: json?.error || "Create failed" } };
+    }
+
+    revalidateTag("slots","max");
+    return { data: json, error: null };
+  } catch (e) {
+    return { data: null, error: { message: "Something went wrong" } };
+  }
+  
+}
+
+
 
 
   
