@@ -5,7 +5,7 @@ import { userService } from "@/service/user.service";
 
 const layout =async ({children}:{children:React.ReactNode}) => {
       const session=await userService.getSession()
-      console.log(session);
+      
     return (
         <div>
             <Navbar user={session?.data?.user}/>

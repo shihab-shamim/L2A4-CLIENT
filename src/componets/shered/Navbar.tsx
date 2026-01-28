@@ -48,7 +48,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
       return [
         { label: "Home", href: "/" },
         { label: "Tutors", href: "/tutors" },
-        { label: "Profile", href: "/profile" },
+        { label: "Profile", href: "/dashboard" },
       ];
     }
     return [
@@ -68,7 +68,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
   const handleLogout = async (): Promise<void> => {
     try {
       const {data,error} = await authClient.signOut()
-      console.log("from vabbar" ,data)
+      
       if(data?.success){
         toast("log out Success")
         router.refresh()

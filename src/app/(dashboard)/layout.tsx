@@ -3,9 +3,9 @@ import React from 'react';
 
 const dashboardLayout = ({children}:{children:React.ReactNode}) => {
     return (
-         <div className="flex min-h-screen bg-gray-50">
+         <div className="flex min-h-screen  bg-gray-50">
       {/* Sidebar */}
-      <aside className="w-72 border-r bg-white">
+      <aside className=" border-r bg-white">
         <DashboardNavbar />
       </aside>
 
