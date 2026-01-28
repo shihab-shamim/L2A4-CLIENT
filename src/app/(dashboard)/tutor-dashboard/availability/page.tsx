@@ -5,8 +5,8 @@ export type AvailabilitySlot = {
   id: string;
   tutorId: string;
 
-  startTime: string; // ISO date string
-  endTime: string; // ISO date string
+  startTime: string; 
+  endTime: string; 
 
   isBooked: boolean;
 
@@ -97,7 +97,7 @@ const Page = async () => {
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-2">
-         <EditPoppup/>
+         <EditPoppup slot={slot} />
 
          <SlotDeletebutton id={slot.id} />
         </div>

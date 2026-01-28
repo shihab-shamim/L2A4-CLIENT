@@ -141,6 +141,38 @@ export async function AvailabilitySlotDelete(deleteId:string) {
   
 }
 
+export async function AvailabilitySlotUpdate(
+  updatedId: string,
+  information: { startTime: string; endTime: string }
+) {
+  try {
+    const cookieStore = await cookies();
+
+    const res = await fetch(`${API_URL}/api/availability/${updatedId}`, {
+      method: "PUT",
+      headers: {
+        Cookie: cookieStore.toString(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(information),
+      cache: "no-store",
+    });
+
+    const json = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      return { data: null, error: { message: json?.error || "Update failed" } };
+    }
+
+    revalidateTag("slots");
+    return { data: json, error: null };
+  } catch {
+    return { data: null, error: { message: "Something went wrong" } };
+  }
+}
+
+
+
 
 
 
