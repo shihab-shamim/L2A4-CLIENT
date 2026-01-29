@@ -2,6 +2,7 @@
 "use client"
 
 import { createBooking } from "@/actions/user.actions";
+import { toast } from "react-toastify";
 
                 // {isUSer  && <BookButton  studentId={isUSer} tutorId={tutor?.tutorProfile?.id} soldId={soltId} />}
 const BookButton = ({studentId,tutorId,slotId}:{studentId:string,tutorId:string,slotId:string}) => {
@@ -13,7 +14,13 @@ const endTime = "2026-03-01T11:00:00.000Z";
      try {
         const {data,error}=await createBooking({studentId,tutorId,slotId,startTime,endTime})
         console.log("bookif",data);
-        console.log("bookif error",error);
+        if(data.data){
+            toast("booking success")
+        }
+        
+        if(error){
+       toast("booking filed")
+        }
         
      } catch (error) {
         console.log(error);

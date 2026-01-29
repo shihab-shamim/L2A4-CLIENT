@@ -448,6 +448,46 @@ export async function createBooking(info:CreateBookingInput) {
 
 
 
+export async function cancelBookingAction(bookingId: string) {
+  try {
+    if (!bookingId) {
+      return { data: null, error: { message: "bookingId is required" } };
+    }
+
+    const cookieStore = await cookies();
+
+    const res = await fetch(`${API_URL}/api/booking/${bookingId}/cancel`, {
+      method: "PATCH",
+      headers: {
+        Cookie: cookieStore.toString(),
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    // ❗ HTTP error handle
+    if (!res.ok) {
+      let msg = `Request failed (${res.status})`;
+      try {
+        const errBody = await res.json();
+        msg = errBody?.message || errBody?.error || msg;
+      } catch {}
+      return { data: null, error: { message: msg } };
+    }
+
+    const result = await res.json();
+
+    // ✅ refresh booking list + tutor list (if slot becomes free again)
+    revalidateTag("booking","max");
+    revalidateTag("alltutors","max");
+
+    return { data: result, error: null };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Something went wrong";
+    return { data: null, error: { message } };
+  }
+}
 
   
 
