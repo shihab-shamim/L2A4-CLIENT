@@ -236,6 +236,31 @@ myBooking: async function () {
   }
 },
 
+getAllBooking:async function () {
+
+  try {
+    const cookieStore = await cookies();
+
+    const res = await fetch(`${API_URL}/api/booking`, {
+      headers: {
+        Cookie: cookieStore.toString(),
+      },
+      cache: "no-store",
+      next: { tags: ["booking"] },
+    });
+
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      return { data: null, error: { message: txt || `HTTP ${res.status}` } };
+    }
+
+    const json = await res.json();
+    return { data: json, error: null };
+  } catch {
+    return { data: null, error: { message: "something went wrong" } };
+  }
+},
+
   
 
     
