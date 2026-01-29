@@ -13,6 +13,11 @@ type CreateUserInput = {
   role?: "STUDENT" | "TUTOR" ;
   callbackURL?: string;
 }
+type Category = {
+  name: string;
+  slug: string;
+  isActive: boolean;
+};
 
 const API_URL=env.API_URL;
 export const updateUserAction =async({email,status}:{
@@ -60,7 +65,7 @@ export async function tutorProfileCreateAndUpdate(
 
   try {
     // If your getTutorProfile returns { success, data }, unwrap here:
-    const existing = (profile as any)?.data ?? profile; // adjust based on your service
+    const existing = (profile )?.data ?? profile; // adjust based on your service
 
     // 3) UPDATE
     if (existing?.id) {
@@ -240,6 +245,110 @@ export async function createAvailabilitySlot(input: {
     return { data: json, error: null };
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : "something went wrong";
+    return { data: null, error: { message } };
+  }
+}
+
+
+export async function deleteCategory(id: string) {
+  try {
+    if (!id) return { data: null, error: { message: "Category id is required" } };
+
+    const cookieStore = await cookies();
+
+    const res = await fetch(`${API_URL}/api/category?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: {
+        Cookie: cookieStore.toString(),
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+
+    // ❗ HTTP error handle
+    if (!res.ok) {
+      let msg = `Request failed (${res.status})`;
+      try {
+        const errBody = await res.json();
+        msg = errBody?.message || errBody?.error || msg;
+      } catch {}
+      return { data: null, error: { message: msg } };
+    }
+    
+    const result = await res.json();
+    revalidateTag("category","max")
+    return { data: result, error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Something went wrong";
+    return { data: null, error: { message } };
+  }
+}
+export async function updateCategory(id: string,info:Category) {
+  try {
+    if (!id) return { data: null, error: { message: "Category id is required" } };
+
+    const cookieStore = await cookies();
+
+    const res = await fetch(`${API_URL}/api/category?id=${encodeURIComponent(id)}`, {
+      method: "PUT",
+      headers: {
+        Cookie: cookieStore.toString(),
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+      body:JSON.stringify(info)
+    });
+
+    // ❗ HTTP error handle
+    if (!res.ok) {
+      let msg = `Request failed (${res.status})`;
+      try {
+        const errBody = await res.json();
+        msg = errBody?.message || errBody?.error || msg;
+      } catch {}
+      return { data: null, error: { message: msg } };
+    }
+    
+    const result = await res.json();
+    revalidateTag("category","max")
+    return { data: result, error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Something went wrong";
+    return { data: null, error: { message } };
+  }
+}
+
+export async function addCategory(data:Category) {
+  try {
+    
+
+    const cookieStore = await cookies();
+
+    const res = await fetch(`${API_URL}/api/category`, {
+      method:"POST",
+      headers: {
+        Cookie: cookieStore.toString(),
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+      body:JSON.stringify(data)
+    });
+
+    // ❗ HTTP error handle
+    if (!res.ok) {
+      let msg = `Request failed (${res.status})`;
+      try {
+        const errBody = await res.json();
+        msg = errBody?.message || errBody?.error || msg;
+      } catch {}
+      return { data: null, error: { message: msg } };
+    }
+    
+    const result = await res.json();
+    revalidateTag("category","max")
+    return { data: result, error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Something went wrong";
     return { data: null, error: { message } };
   }
 }

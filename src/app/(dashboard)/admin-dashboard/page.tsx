@@ -27,6 +27,8 @@ export default async function AdminDashboardPage() {
   const {data,error}=await userService.getAllUsers();
   
   const activeTutor= data.data.filter((item:User) => item.status ==="ACTIVE" && item.role ==="TUTOR");
+    const {data:category,error:categoryError}=await userService.getAllCategory()
+
 
   return (
     // ✅ prevents left-to-right scrollbar
@@ -80,6 +82,16 @@ export default async function AdminDashboardPage() {
             </p>
             <div className="mt-3 h-8 w-24 rounded bg-gray-100" />
             {activeTutor.length || 0}
+            <p className="mt-3 break-words text-sm text-gray-600">
+              Tutors currently available and active.
+            </p>
+          </div>
+          <div className="w-full max-w-full rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Total Category
+            </p>
+            <div className="mt-3 h-8 w-24 rounded bg-gray-100" />
+            {category.data.length || 0}
             <p className="mt-3 break-words text-sm text-gray-600">
               Tutors currently available and active.
             </p>

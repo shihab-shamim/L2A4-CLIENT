@@ -153,6 +153,34 @@ getAvailabilitySlot: async function () {
   } catch {
     return { data: null, error: { message: "something went wrong" } };
   }
+},
+
+getAllCategory:async function(){
+
+   try {
+        
+          const cookieStore= await cookies()
+      const res= await fetch(`${API_URL}/api/category`,{
+        headers:{
+          Cookie:cookieStore.toString()
+        },
+        cache:"no-store"
+       , next: {
+          tags: ["category"],
+        },
+      })
+
+
+
+       const category = await res.json()
+        if(!category){
+          return {data:null , error:{message:"session is missing"}}
+        }
+        return {data:category,error:null}
+              } catch (error) {
+                return {data:null , error:{message:"something went wrong"}}
+              }
+
 }
 
   
