@@ -39,6 +39,18 @@ export type TutorProfileData = {
   languages: string[];
   isFeatured: boolean;
 };
+type UserProfile = {
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  image: string | null;
+  phone: string | null;
+  role: "STUDENT" | "TUTOR" | "ADMIN";
+  status: "ACTIVE" | "BANNED";
+  createdAt: string;
+  updatedAt: string;
+};
 
 type ActionResult<T> = {
   data: T | null;
@@ -352,6 +364,42 @@ export async function addCategory(data:Category) {
     return { data: null, error: { message } };
   }
 }
+
+export async function updateStudentProfile(info:UserProfile) {
+  try {
+
+
+    const cookieStore = await cookies();
+
+    const res = await fetch(`${API_URL}/api/user/profile`, {
+      method: "PUT",
+      headers: {
+        Cookie: cookieStore.toString(),
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+      body:JSON.stringify(info)
+    });
+
+    // ❗ HTTP error handle
+    if (!res.ok) {
+      let msg = `Request failed (${res.status})`;
+      try {
+        const errBody = await res.json();
+        msg = errBody?.message || errBody?.error || msg;
+      } catch {}
+      return { data: null, error: { message: msg } };
+    }
+    
+    const result = await res.json();
+    revalidateTag("users","max")
+    return { data: result, error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Something went wrong";
+    return { data: null, error: { message } };
+  }
+}
+
 
 
   
