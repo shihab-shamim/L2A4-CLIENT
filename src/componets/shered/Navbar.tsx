@@ -48,7 +48,7 @@ const Navbar: React.FC<NavbarProps> = ({ user }) => {
       return [
         { label: "Home", href: "/" },
         { label: "Tutors", href: "/tutors" },
-        { label: "Profile", href: "/dashboard" },
+        { label: "Dashboard", href: "/dashboard" },
       ];
     }
     return [

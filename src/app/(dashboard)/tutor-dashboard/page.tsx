@@ -25,13 +25,13 @@ export default function TutorDashboardPage() {
 
             <div className="flex flex-col gap-2 sm:flex-row">
               <Link
-                href="/tutor/availability"
+                href="/tutor-dashboard/availability"
                 className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500 sm:w-auto"
               >
                 Set Availability
               </Link>
               <Link
-                href="/tutor/profile"
+                href="/tutor-dashboard/profile"
                 className="inline-flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 sm:w-auto"
               >
                 Edit Profile

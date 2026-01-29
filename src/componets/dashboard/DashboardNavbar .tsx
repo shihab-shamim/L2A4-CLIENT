@@ -43,8 +43,8 @@ const navLinks: Record<UserRole, { label: string; href: string }[]> = {
   ADMIN: [
     { label: "Dashboard", href: "/admin-dashboard" },
     { label: "Users", href: "/admin-dashboard/users" },
-    { label: "Bookings", href: "/admin/bookings" },
-    { label: "Categories", href: "/admin/categories" },
+    { label: "Bookings", href: "/admin-dashboard/bookings" },
+    { label: "Categories", href: "/admin-dashboard/categories" },
   ],
 };
 
