@@ -8,6 +8,62 @@ export type Tutor = {
   location: string;
   experience: number; // years
 };
+// Availability slot
+export type AvailabilitySlot = {
+  id: string;
+  startTime: string; // ISO string
+  endTime: string;   // ISO string
+  isBooked: boolean;
+};
+
+// Tutor profile (detailed info)
+export type TutorProfile = {
+  id: string;
+  userId: string;
+
+  headline: string;
+  about: string;
+
+  hourlyRate: number;
+  currency: "BDT" | "USD";
+
+  subjects: string[];
+  languages: string[];
+
+  ratingAvg: number;
+  totalReviews: number;
+  totalSessions: number;
+
+  isFeatured: boolean;
+
+  createdAt: string;
+  updatedAt: string;
+};
+
+// Main Tutor type
+export type TutorP = {
+  // ===== Existing fields (keep these) =====
+  id: string;
+  name: string;
+  subject: string;
+  rating: number;
+  // reviews: number;
+  pricePerHour: number;
+  location: string;
+  experience: number; // years
+
+  // ===== Added fields =====
+  image?: string | null;
+
+  availability: AvailabilitySlot[];
+
+  tutorProfile: TutorProfile;
+  reviews:{
+avgRating:number,
+ totalReviews: number
+  }
+};
+
 
 export const tutorsData: Tutor[] = [
   {

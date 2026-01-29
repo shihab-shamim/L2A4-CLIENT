@@ -1,4 +1,5 @@
 "use client"
+import Link from "next/link";
 import React, { useMemo, useState } from "react";
 
 type CategoryOption = {
@@ -51,67 +52,18 @@ const SearchAndFiltersSection: React.FC<SearchAndFiltersSectionProps> = ({
         <div className="mt-6 rounded-2xl border bg-gray-50 p-4 sm:p-6">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-12 md:items-end">
             {/* Query */}
-            <div className="md:col-span-5">
-              <label className="text-xs font-semibold text-gray-700">Search</label>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="e.g. Math, Physics, English..."
-                className="mt-2 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-900/20"
-              />
-            </div>
-
-            {/* Category */}
-            <div className="md:col-span-3">
-              <label className="text-xs font-semibold text-gray-700">Category</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="mt-2 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-900/20"
-              >
-                {categories.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Rating */}
-            <div className="md:col-span-2">
-              <label className="text-xs font-semibold text-gray-700">Min Rating</label>
-              <input
-                type="number"
-                min={0}
-                max={5}
-                value={minRating}
-                onChange={(e) => setMinRating(Number(e.target.value))}
-                className="mt-2 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-900/20"
-              />
-            </div>
-
-            {/* Price */}
-            <div className="md:col-span-2">
-              <label className="text-xs font-semibold text-gray-700">Max Price</label>
-              <input
-                type="number"
-                min={0}
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="mt-2 w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-900/20"
-              />
-            </div>
+      
 
             {/* Button */}
             <div className="md:col-span-12">
-              <button
+              <Link href="/tutors"
                 type="button"
-                onClick={handleSubmit}
-                disabled={!canSubmit}
-                className="mt-2 w-full rounded-xl bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+               
+                
+                className="mt-2 w-full rounded-xl cursor-pointer bg-gray-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Search Tutors
-              </button>
+              </Link>
             </div>
           </div>
 

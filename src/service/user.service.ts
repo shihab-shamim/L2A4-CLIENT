@@ -181,7 +181,31 @@ getAllCategory:async function(){
                 return {data:null , error:{message:"something went wrong"}}
               }
 
+},
+
+getAllTutorsProfile:async function(){
+
+   try {
+      const res= await fetch(`${API_URL}/api/alltutors`,{
+        cache:"no-store"
+       , next: {
+          tags: ["alltutors"],
+        },
+      })
+
+
+
+       const category = await res.json()
+        if(!category){
+          return {data:null , error:{message:"all tutors get filed"}}
+        }
+        return {data:category,error:null}
+              } catch (error) {
+                return {data:null , error:{message:"something went wrong"}}
+              }
+
 }
+
 
   
 

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 type StepItem = {
@@ -5,11 +6,29 @@ type StepItem = {
   description: string;
 };
 
-const HowItWorksSection: React.FC = () => {
+type UserProfile = {
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  image: string | null;
+  phone: string | null;
+  role: "STUDENT" | "TUTOR" | "ADMIN";
+  status: "ACTIVE" | "BANNED";
+  createdAt: string;
+  updatedAt: string;
+};
+
+type Props = {
+  user: UserProfile | null;
+};
+
+export default function HowItWorksSection({ user }: Props) {
   const steps: StepItem[] = [
     {
       title: "Browse Tutors",
-      description: "Search by subject, filter by rating and price, then open tutor profiles.",
+      description:
+        "Search by subject, filter by rating and price, then open tutor profiles.",
     },
     {
       title: "Book Instantly",
@@ -17,11 +36,13 @@ const HowItWorksSection: React.FC = () => {
     },
     {
       title: "Attend & Learn",
-      description: "Join the session, track your learning progress and completed bookings.",
+      description:
+        "Join the session, track your learning progress and completed bookings.",
     },
     {
       title: "Review Tutors",
-      description: "Leave verified reviews after sessions to help the community.",
+      description:
+        "Leave verified reviews after sessions to help the community.",
     },
   ];
 
@@ -29,9 +50,12 @@ const HowItWorksSection: React.FC = () => {
     <section className="bg-white">
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="max-w-2xl">
-          <h2 className="text-2xl font-bold text-gray-900">How SkillBridge works</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            How SkillBridge works
+          </h2>
           <p className="mt-2 text-sm text-gray-600">
-            A simple workflow for students and tutors—optimized for fast discovery and scheduling.
+            A simple workflow for students and tutors—optimized for fast discovery
+            and scheduling.
           </p>
         </div>
 
@@ -44,7 +68,9 @@ const HowItWorksSection: React.FC = () => {
                 </div>
                 <p className="text-base font-semibold text-gray-900">{s.title}</p>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-gray-600">{s.description}</p>
+              <p className="mt-3 text-sm leading-relaxed text-gray-600">
+                {s.description}
+              </p>
             </div>
           ))}
         </div>
@@ -57,17 +83,18 @@ const HowItWorksSection: React.FC = () => {
                 Create an account and book your first session today.
               </p>
             </div>
-            <a
-              href="/register"
-              className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-100"
-            >
-              Register Now
-            </a>
+
+            {!user && (
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-100"
+              >
+                Register Now
+              </Link>
+            )}
           </div>
         </div>
       </div>
     </section>
   );
-};
-
-export default HowItWorksSection;
+}

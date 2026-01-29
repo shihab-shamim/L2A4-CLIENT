@@ -1,15 +1,20 @@
-"use client"
+
 import TutorCard from "@/componets/tutors/TutorCard";
-import { Tutor, tutorsData } from "@/componets/tutors/tutors.data";
+import { TutorP, tutorsData } from "@/componets/tutors/tutors.data";
+import { userService } from "@/service/user.service";
 import React from "react";
 // import TutorCard from "./TutorCard";
 // import { tutorsData, Tutor } from "./tutors.data";
 
-const TutorsPage: React.FC = () => {
-  const handleViewProfile = (id: string): void => {
-    // later replace with router navigation
-    window.location.href = `/tutors/${id}`;
-  };
+const TutorsPage = async () => {
+  // const handleViewProfile = (id: string): void => {
+  //   // later replace with router navigation
+  //   window.location.href = `/tutors/${id}`;
+  // };
+  const {data,error} =await userService.getAllTutorsProfile()
+  const tutorProfile=data.data
+  // console.log(tutorProfile);
+ 
 
   return (
     <main className="bg-gray-50">
@@ -24,11 +29,11 @@ const TutorsPage: React.FC = () => {
 
         {/* Tutors Grid */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {tutorsData.map((tutor: Tutor) => (
+          {tutorProfile.map((tutor: TutorP) => (
             <TutorCard
               key={tutor.id}
               tutor={tutor}
-              onViewProfile={handleViewProfile}
+              // onViewProfile={handleViewProfile}
             />
           ))}
         </div>
