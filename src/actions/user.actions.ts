@@ -63,6 +63,13 @@ export interface CreateBookingInput {
   startTime: string; // ISO datetime string
   endTime: string;   // ISO datetime string
 }
+export interface CreateReviewInput {
+  studentId: string;
+  tutorId: string;
+  bookingId: string;
+  rating?:number,
+  comment?:string
+}
 
 export async function tutorProfileCreateAndUpdate(
   information: TutorProfileData
@@ -485,6 +492,42 @@ export async function cancelBookingAction(bookingId: string) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Something went wrong";
+    return { data: null, error: { message } };
+  }
+}
+
+
+export async function createReview(info:CreateReviewInput) {
+  try {
+
+
+    const cookieStore = await cookies();
+
+    const res = await fetch(`${API_URL}/api/review`, {
+      method:"POST",
+      headers: {
+        Cookie: cookieStore.toString(),
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+      body:JSON.stringify({...info})
+    });
+
+    // ❗ HTTP error handle
+    if (!res.ok) {
+      let msg = `Request failed (${res.status})`;
+      try {
+        const errBody = await res.json();
+        msg = errBody?.message || errBody?.error || msg;
+      } catch {}
+      return { data: null, error: { message: msg } };
+    }
+    
+    const result = await res.json();
+    revalidateTag("alltutors","max")
+    return { data: result, error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Something went wrong";
     return { data: null, error: { message } };
   }
 }
